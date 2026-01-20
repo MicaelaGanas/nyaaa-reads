@@ -28,37 +28,62 @@ export async function GET(
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`MangaDex API error ${response.status}:`, errorText);
+      
+      // Return errors with CORS headers
+      const headers = new Headers();
+      headers.set('Access-Control-Allow-Origin', '*');
+      headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      
       return NextResponse.json(
         { error: `MangaDex API returned ${response.status}` },
-        { status: response.status }
+        { 
+          status: response.status,
+          headers,
+        }
       );
     }
 
     const data = await response.json();
 
+    // Create response with proper CORS headers
+    const headers = new Headers();
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+
     return NextResponse.json(data, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
-      },
+      status: 200,
+      headers,
     });
   } catch (error: any) {
     console.error('Chapter Server API Error:', error);
+    
+    // Return errors with CORS headers too
+    const headers = new Headers();
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
     return NextResponse.json(
       { error: error?.name === 'AbortError' ? 'Request timeout' : 'Failed to fetch chapter server', details: error?.message },
-      { status: error?.name === 'AbortError' ? 504 : 500 }
+      { 
+        status: error?.name === 'AbortError' ? 504 : 500,
+        headers,
+      }
     );
   }
 }
 
 export async function OPTIONS() {
+  const headers = new Headers();
+  headers.set('Access-Control-Allow-Origin', '*');
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
   return new NextResponse(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+    status: 200,
+    headers,
   });
 }

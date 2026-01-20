@@ -47,10 +47,13 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
       for (let i = 0; i <= retries; i++) {
         try {
           const d = await fetchJsonCached(`/api/chapter/${chapterId}`);
+          console.log('Chapter data received:', d); // DEBUG
+          
           if (!mounted) return;
           
           // Only reject if there's an explicit error
           if (d?.error) {
+            console.error('API returned error:', d.error, d.details); // DEBUG
             if (i < retries) {
               await new Promise(r => setTimeout(r, 1000 * (i + 1))); // Wait before retry
               continue;
@@ -64,11 +67,14 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
           const hash = chapter.hash;
           const files: string[] = chapter.data || [];
           
+          console.log('Parsed:', { base, hash, filesCount: files?.length }); // DEBUG
+          
           if (base && hash && files && files.length > 0) {
             const imgs = files.map((f: string) => `${base}/data/${hash}/${f}`);
             setPages(imgs);
             return; // Success, exit retry loop
           } else {
+            console.warn('Missing required fields:', { hasBase: !!base, hasHash: !!hash, filesCount: files?.length }); // DEBUG
             setPages([]);
             return;
           }
