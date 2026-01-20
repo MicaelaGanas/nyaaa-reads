@@ -163,7 +163,14 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
         {mode === "scroll" ? (
           <div className="space-y-2">
             {pages.map((p, i) => (
-              <img key={i} src={p} alt={`page ${i + 1}`} className="w-full rounded-lg shadow-lg" />
+              <img 
+                key={i} 
+                src={p} 
+                alt={`page ${i + 1}`} 
+                className="w-full rounded-lg shadow-lg" 
+                onError={(e) => console.error(`Failed to load page ${i + 1}:`, p, e)}
+                onLoad={() => console.log(`Loaded page ${i + 1}`)}
+              />
             ))}
           </div>
         ) : (
@@ -198,7 +205,13 @@ function PagedView({ pages }: { pages: string[] }) {
         </button>
       </div>
       <div>
-        <img src={pages[index]} alt={`page ${index + 1}`} className="w-full rounded-lg shadow-lg" />
+        <img 
+          src={pages[index]} 
+          alt={`page ${index + 1}`} 
+          className="w-full rounded-lg shadow-lg" 
+          onError={(e) => console.error(`Failed to load page ${index + 1}:`, pages[index], e)}
+          onLoad={() => console.log(`Loaded page ${index + 1}`)}
+        />
       </div>
     </div>
   );

@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'uploads.mangadex.org',
       },
+      {
+        protocol: 'https',
+        hostname: '**.mangadex.network',
+      },
     ],
   },
   // Ensure API routes use Node.js runtime on Vercel
