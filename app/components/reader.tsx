@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState, useRef } from "react";
+import { fetchJsonCached } from "../lib/fetchCache";
 
 interface ReaderProps {
   chapterId: string;
@@ -40,16 +41,24 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    fetch(`/api/chapter/${chapterId}`)
-      .then(r => r.json())
+    fetchJsonCached(`/api/chapter/${chapterId}`)
       .then(d => {
         if (!mounted) return;
+        // Only reject if there's an explicit error
+        if (d?.error) {
+          setPages([]);
+          return;
+        }
         const base = d.baseUrl;
         const chapter = d.chapter || {};
         const hash = chapter.hash;
         const files: string[] = chapter.data || [];
-        const imgs = files.map((f: string) => `${base}/data/${hash}/${f}`);
-        setPages(imgs);
+        if (base && hash && files && files.length > 0) {
+          const imgs = files.map((f: string) => `${base}/data/${hash}/${f}`);
+          setPages(imgs);
+        } else {
+          setPages([]);
+        }
       })
       .catch((err) => {
         console.error('Error fetching chapter:', err);
