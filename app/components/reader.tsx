@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState, useRef } from "react";
-import { fetchJsonCached } from "../lib/fetchCache";
+import { fetchJsonCached, clearFetchCache } from "../lib/fetchCache";
 
 interface ReaderProps {
   chapterId: string;
@@ -41,6 +41,9 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    
+    // Clear cache when chapter changes to force fresh fetch
+    clearFetchCache();
     
     // Retry logic for Vercel reliability
     const fetchWithRetry = async (retries = 2) => {
