@@ -87,13 +87,7 @@ export default function Series({ id }: { id: string }) {
     artists = data.relationships.filter((r: any) => r.type === "artist").map((r: any) => r.attributes?.name).filter(Boolean);
   }
 
-  if (openChapter) {
-    return (
-      <div>
-        <Reader chapterId={openChapter} onClose={() => setOpenChapter(null)} />
-      </div>
-    );
-  }
+  
 
   const availableLanguages = Array.from(new Set(chapters.map((c) => c.attributes?.translatedLanguage).filter(Boolean)));
 
@@ -133,6 +127,14 @@ export default function Series({ id }: { id: string }) {
     });
     // Take the first of each group (or let user expand to see all)
     displayChapters = Array.from(grouped.values()).map(group => group[0]);
+  }
+
+  if (openChapter) {
+    return (
+      <div>
+        <Reader chapterId={openChapter} onClose={() => setOpenChapter(null)} chapters={displayChapters} onRequestChapterChange={(id: string) => setOpenChapter(id)} />
+      </div>
+    );
   }
 
   return (

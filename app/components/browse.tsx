@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import MangaCard from "./MangaCard";
+import { fetchJsonCached } from "../lib/fetchCache";
 
 type MangaItem = any;
 
@@ -84,18 +85,14 @@ export default function Browse({ query = "", onSelectManga, genreMode, selectedG
     setLoading(true);
     setOffset(0);
 
-    fetch(buildUrl({ limit: LIMIT, offset: 0, q, status, sortBy, genreMode, selectedGenre, hideFilters }))
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
-        return r.json();
-      })
+    fetchJsonCached(buildUrl({ limit: LIMIT, offset: 0, q, status, sortBy, genreMode, selectedGenre, hideFilters }))
       .then((data) => {
         if (!mounted) return;
         setManga(data.data || []);
         setHasMore(data.total > LIMIT);
       })
       .catch((error) => {
-        console.error('Failed to fetch manga:', error);
+        console.error("Failed to fetch manga:", error);
         setManga([]);
       })
       .finally(() => setLoading(false));
@@ -110,8 +107,7 @@ export default function Browse({ query = "", onSelectManga, genreMode, selectedG
     const newOffset = offset + LIMIT;
     setLoadingMore(true);
 
-    fetch(buildUrl({ limit: LIMIT, offset: newOffset, q, status, sortBy, genreMode, selectedGenre, hideFilters }))
-      .then((r) => r.json())
+    fetchJsonCached(buildUrl({ limit: LIMIT, offset: newOffset, q, status, sortBy, genreMode, selectedGenre, hideFilters }))
       .then((data) => {
         setManga((prev) => [...prev, ...(data.data || [])]);
         setOffset(newOffset);
