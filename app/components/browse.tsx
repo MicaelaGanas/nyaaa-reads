@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import MangaCard from "./MangaCard";
+import EmptyState from "./EmptyState";
 import { fetchJsonCached } from "../lib/fetchCache";
 
 type MangaItem = any;
@@ -88,8 +89,28 @@ export default function Browse({ query = "", onSelectManga, genreMode, selectedG
     fetchJsonCached(buildUrl({ limit: LIMIT, offset: 0, q, status, sortBy, genreMode, selectedGenre, hideFilters }))
       .then((data) => {
         if (!mounted) return;
-        setManga(data.data || []);
-        setHasMore(data.total > LIMIT);
+        const list = data.data || [];
+        // If query provided and no results, try a broader fallback (increase limit, remove contentRating filters)
+        if (q && list.length === 0) {
+          try {
+            const fallbackUrl = new URL("/api/manga", typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+            fallbackUrl.searchParams.set("limit", String(50));
+            fallbackUrl.searchParams.set("offset", String(0));
+            fallbackUrl.searchParams.set("includes[]", "cover_art");
+            fallbackUrl.searchParams.set("title", q);
+            // broad search without contentRating filters
+            fetchJsonCached(fallbackUrl.toString()).then((fb) => {
+              if (!mounted) return;
+              setManga(fb.data || []);
+              setHasMore((fb.total || 0) > 50);
+            }).catch(() => setManga([]));
+          } catch (e) {
+            setManga([]);
+          }
+        } else {
+          setManga(list);
+          setHasMore(data.total > LIMIT);
+        }
       })
       .catch((error) => {
         console.error("Failed to fetch manga:", error);
@@ -188,7 +209,19 @@ export default function Browse({ query = "", onSelectManga, genreMode, selectedG
 
       <section className="flex-1">
         {loading && <div className="text-[#93a9a9] text-sm">Loading…</div>}
-        {!loading && manga.length === 0 && <div className="text-[#93a9a9] text-sm">No results</div>}
+        
+        {!loading && manga.length === 0 && (
+          <EmptyState
+            title="No results"
+            description="We couldn't find any manga matching your search or filters. Try clearing filters or search terms."
+            actionLabel="Reset filters"
+            onAction={() => {
+              setStatus("all");
+              setSortBy("relevance");
+              setOffset(0);
+            }}
+          />
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 w-full">
           {manga.map((m) => (
             <MangaCard key={m.id} manga={m} onOpen={onSelectManga || (() => {})} />

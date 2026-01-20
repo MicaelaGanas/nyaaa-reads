@@ -89,6 +89,16 @@ export default function Header({ onToggleBookmarks, onSearch, onGenreSelect }: {
 
           {/* Nav Actions */}
           <nav className="flex items-center gap-3">
+            {/* Mobile search button */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="md:hidden flex items-center justify-center p-2 rounded-full border border-[#2bd5d5]/20 text-[#aeeeee] bg-[#0a0a0a]/40 hover:bg-[#052424] transition-all"
+              aria-label="Open search"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
             {/* Hamburger Menu */}
             <div className="relative">
               <button
@@ -138,6 +148,33 @@ export default function Header({ onToggleBookmarks, onSearch, onGenreSelect }: {
           </nav>
         </div>
       </div>
+      {/* Mobile search overlay */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-60 bg-black/70 flex items-start pt-24 px-4">
+          <div className="max-w-3xl w-full mx-auto">
+            <form onSubmit={(e) => { e.preventDefault(); onSearch?.(searchValue); setSearchOpen(false); }} className="w-full">
+              <div className="relative">
+                <input
+                  autoFocus
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  placeholder="Search manga..."
+                  className="w-full px-4 py-3 bg-[#0a0a0a]/90 border border-[#2bd5d5]/30 rounded-lg text-[#e6f7f7] placeholder-[#93a9a9] focus:outline-none focus:border-[#2bd5d5]"
+                />
+                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-[#2bd5d5] hover:text-[#19bfbf]">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
+            </form>
+            <div className="mt-3 flex justify-end">
+              <button onClick={() => setSearchOpen(false)} className="px-3 py-2 text-sm text-[#93a9a9]">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
     </>
   );
