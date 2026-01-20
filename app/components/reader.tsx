@@ -41,30 +41,49 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    fetchJsonCached(`/api/chapter/${chapterId}`)
-      .then(d => {
-        if (!mounted) return;
-        // Only reject if there's an explicit error
-        if (d?.error) {
-          setPages([]);
-          return;
+    
+    // Retry logic for Vercel reliability
+    const fetchWithRetry = async (retries = 2) => {
+      for (let i = 0; i <= retries; i++) {
+        try {
+          const d = await fetchJsonCached(`/api/chapter/${chapterId}`);
+          if (!mounted) return;
+          
+          // Only reject if there's an explicit error
+          if (d?.error) {
+            if (i < retries) {
+              await new Promise(r => setTimeout(r, 1000 * (i + 1))); // Wait before retry
+              continue;
+            }
+            setPages([]);
+            return;
+          }
+          
+          const base = d.baseUrl;
+          const chapter = d.chapter || {};
+          const hash = chapter.hash;
+          const files: string[] = chapter.data || [];
+          
+          if (base && hash && files && files.length > 0) {
+            const imgs = files.map((f: string) => `${base}/data/${hash}/${f}`);
+            setPages(imgs);
+            return; // Success, exit retry loop
+          } else {
+            setPages([]);
+            return;
+          }
+        } catch (err) {
+          console.error(`Error fetching chapter (attempt ${i + 1}):`, err);
+          if (i < retries) {
+            await new Promise(r => setTimeout(r, 1000 * (i + 1))); // Wait before retry
+          } else {
+            setPages([]);
+          }
         }
-        const base = d.baseUrl;
-        const chapter = d.chapter || {};
-        const hash = chapter.hash;
-        const files: string[] = chapter.data || [];
-        if (base && hash && files && files.length > 0) {
-          const imgs = files.map((f: string) => `${base}/data/${hash}/${f}`);
-          setPages(imgs);
-        } else {
-          setPages([]);
-        }
-      })
-      .catch((err) => {
-        console.error('Error fetching chapter:', err);
-        setPages([]);
-      })
-      .finally(() => setLoading(false));
+      }
+    };
+
+    fetchWithRetry().finally(() => setLoading(false));
 
     return () => {
       mounted = false;
