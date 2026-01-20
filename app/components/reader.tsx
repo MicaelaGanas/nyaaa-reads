@@ -1,29 +1,42 @@
 "use client"
 
 import React, { useEffect, useState, useRef } from "react";
-import { fetchJsonCached } from "../lib/fetchCache";
 
-export default function Reader({ chapterId, onClose, chapters, onRequestChapterChange }: { chapterId: string; onClose: () => void; chapters?: any[]; onRequestChapterChange?: (id: string) => void }) {
+export default function Reader({ chapterId, onClose }: { chapterId: string; onClose: () => void }) {
   const [pages, setPages] = useState<string[]>([]);
   const [mode, setMode] = useState<"scroll" | "paged">("scroll");
   const [loading, setLoading] = useState(false);
-  const [isAtTop, setIsAtTop] = useState(true);
-  const [isNearBottom, setIsNearBottom] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const [hoveringTop, setHoveringTop] = useState(false);
 
-  // Controls are fixed and do not hide on scroll — no scroll handler needed.
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (hoveringTop) {
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      if (currentScrollY < 50) setHeaderVisible(true);
+      else if (currentScrollY > lastScrollY.current && currentScrollY > 100) setHeaderVisible(false);
+      else if (currentScrollY < lastScrollY.current) setHeaderVisible(true);
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, hoveringTop]);
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    fetchJsonCached(`/api/chapter/${chapterId}`)
-      .then((d) => {
+    fetch(`/api/chapter/${chapterId}`)
+      .then(r => r.json())
+      .then(d => {
         if (!mounted) return;
-        // Validate response shape
-        if (!d || d.error || !d.baseUrl || !d.chapter || !Array.isArray(d.chapter.data)) {
-          console.warn('Invalid chapter server response for', chapterId, d);
-          setPages([]);
-          return;
-        }
         const base = d.baseUrl;
         const chapter = d.chapter || {};
         const hash = chapter.hash;
@@ -32,7 +45,7 @@ export default function Reader({ chapterId, onClose, chapters, onRequestChapterC
         setPages(imgs);
       })
       .catch((err) => {
-        console.error('Error fetching chapter server:', err);
+        console.error('Error fetching chapter:', err);
         setPages([]);
       })
       .finally(() => setLoading(false));
@@ -41,58 +54,6 @@ export default function Reader({ chapterId, onClose, chapters, onRequestChapterC
       mounted = false;
     };
   }, [chapterId]);
-
-  // Find previous/next chapter IDs when a chapters list is provided
-  const currentIndex = (chapters || []).findIndex((c: any) => c.id === chapterId);
-  const prevChapterId = currentIndex > -1 ? (chapters || [])[currentIndex - 1]?.id : undefined;
-  const nextChapterId = currentIndex > -1 ? (chapters || [])[currentIndex + 1]?.id : undefined;
-  const currentChapterObj = (chapters || []).find((c: any) => c.id === chapterId);
-  const chapterLabel = currentChapterObj ? (currentChapterObj.attributes?.chapter ? `Ch ${currentChapterObj.attributes.chapter}` : (currentChapterObj.attributes?.title || "")) : "";
-
-  // Prefetch next chapter metadata and first image to speed up navigation
-  useEffect(() => {
-    if (!nextChapterId) return;
-    let mounted = true;
-    (async () => {
-      try {
-        const meta = await fetchJsonCached(`/api/chapter/${nextChapterId}`);
-        if (!mounted || !meta) return;
-        if (meta.error || !meta.baseUrl || !meta.chapter || !Array.isArray(meta.chapter.data)) {
-          return;
-        }
-        const base = meta.baseUrl;
-        const chapter = meta.chapter || {};
-        const hash = chapter.hash;
-        const files: string[] = chapter.data || [];
-        // Preload first 1-3 images
-        files.slice(0, 3).forEach((f: string) => {
-          const img = new Image();
-          img.src = `${base}/data/${hash}/${f}`;
-        });
-      } catch (e) {
-        // ignore
-      }
-    })();
-    return () => { mounted = false; };
-  }, [nextChapterId]);
-
-  // Track scroll position to show controls only when at top or near bottom
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY || 0;
-      const viewportBottom = window.innerHeight + y;
-      const docHeight = document.documentElement?.scrollHeight || document.body.scrollHeight || 0;
-      setIsAtTop(y < 80);
-      setIsNearBottom(viewportBottom >= docHeight - 120);
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
-  }, []);
 
   if (loading) return <div className="text-[#93a9a9] text-center py-8">Loading pages…</div>;
   if (pages.length === 0) return (
@@ -103,52 +64,46 @@ export default function Reader({ chapterId, onClose, chapters, onRequestChapterC
   );
 
   return (
-    <div className="min-h-screen bg-[#040506]">
-      <div className="max-w-5xl mx-auto px-4 pt-6">{mode === "scroll" ? (
-        <div className="space-y-2">
-          {pages.map((p, i) => (
-            <img key={i} src={p} alt={`page ${i + 1}`} className="w-full rounded-lg shadow-lg" />
-          ))}
+    <div className="min-h-screen bg-[#040506] pb-12">
+      {/* Reader Header - Auto-hide on scroll */}
+      <div 
+        className={`fixed top-0 left-0 right-0 z-30 bg-gradient-to-b from-black via-black/95 to-transparent border-b border-[#2bd5d5]/20 backdrop-blur-xl transition-transform duration-500 ${
+          headerVisible || hoveringTop ? 'translate-y-0' : '-translate-y-full'
+        }`}
+        onMouseEnter={() => setHoveringTop(true)}
+        onMouseLeave={() => setHoveringTop(false)}
+      >
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 text-[#2bd5d5] hover:text-[#19bfbf] transition-colors font-semibold"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Chapters
+          </button>
+          
+          <button
+            onClick={() => setMode(m => (m === "scroll" ? "paged" : "scroll"))}
+            className="px-4 py-2 rounded-lg bg-[#2bd5d5]/10 border border-[#2bd5d5]/30 text-[#2bd5d5] text-sm font-semibold hover:bg-[#2bd5d5]/20 transition-all"
+          >
+            {mode === "scroll" ? "📖 Paged Mode" : "📜 Scroll Mode"}
+          </button>
         </div>
-      ) : (
-        <PagedView pages={pages} />
-      )}
       </div>
 
-      {/* Bottom Chapter Controls - fixed and not part of scroll */}
-      {(isAtTop || isNearBottom) && (
-        <div className="fixed bottom-4 left-0 right-0 z-40 flex items-center justify-center pointer-events-none">
-          <div className="pointer-events-auto max-w-5xl w-full px-4">
-            <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-2 bg-[#0a0a0a]/60 border border-[#2bd5d5]/20 rounded-md p-2">
-              <div className="w-full sm:w-auto">
-                <button
-                  onClick={() => {
-                    if (prevChapterId && onRequestChapterChange) onRequestChapterChange(prevChapterId);
-                  }}
-                  disabled={!prevChapterId}
-                  className="w-full sm:w-auto px-2 py-1.5 text-xs bg-[#2bd5d5]/10 border border-[#2bd5d5]/30 text-[#2bd5d5] rounded-md font-semibold hover:bg-[#2bd5d5]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  ← Prev Chapter
-                </button>
-              </div>
-
-              <div className="text-xs text-[#93a9a9]">{chapterLabel} • {pages.length} pages</div>
-
-              <div className="w-full sm:w-auto">
-                <button
-                  onClick={() => {
-                    if (nextChapterId && onRequestChapterChange) onRequestChapterChange(nextChapterId);
-                  }}
-                  disabled={!nextChapterId}
-                  className="w-full sm:w-auto px-2 py-1.5 text-xs bg-[#2bd5d5]/10 border border-[#2bd5d5]/30 text-[#2bd5d5] rounded-md font-semibold hover:bg-[#2bd5d5]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next Chapter →
-                </button>
-              </div>
-            </div>
+      <div className="max-w-5xl mx-auto px-4 pt-20">
+        {mode === "scroll" ? (
+          <div className="space-y-2">
+            {pages.map((p, i) => (
+              <img key={i} src={p} alt={`page ${i + 1}`} className="w-full rounded-lg shadow-lg" />
+            ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <PagedView pages={pages} />
+        )}
+      </div>
     </div>
   );
 }
