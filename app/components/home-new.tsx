@@ -272,6 +272,7 @@ export default function Home() {
                   src={getFeaturedCover()}
                   alt={featuredTitle}
                   className="w-full h-full object-cover blur-md scale-110 opacity-40 animate-fadeIn"
+                  fallback={<div className="w-full h-full bg-gray-900" />}
                 />
               </div>
               
