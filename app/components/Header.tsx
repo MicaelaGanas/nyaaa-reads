@@ -3,13 +3,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import ThemeToggle from "./ThemeToggle";
 
-export default function Header({ onToggleBookmarks, onSearch, onGenreSelect, onNavigateHome, onNavigatePopular, onNavigateLatest, onNavigateBrowse, activePage = "home" }: { onToggleBookmarks?: () => void; onSearch?: (q: string) => void; onGenreSelect?: (genre: string) => void; onNavigateHome?: () => void; onNavigatePopular?: () => void; onNavigateLatest?: () => void; onNavigateBrowse?: () => void; activePage?: "home" | "popular" | "latest" | "browse" }) {
+export default function Header({ onToggleBookmarks, onSearch, onGenreSelect, onNavigateHome, onNavigatePopular, onNavigateLatest, onNavigateBrowse, onNavigateAbout, onNavigateTerms, onNavigatePrivacy, activePage = "home" }: { onToggleBookmarks?: () => void; onSearch?: (q: string) => void; onGenreSelect?: (genre: string) => void; onNavigateHome?: () => void; onNavigatePopular?: () => void; onNavigateLatest?: () => void; onNavigateBrowse?: () => void; onNavigateAbout?: () => void; onNavigateTerms?: () => void; onNavigatePrivacy?: () => void; activePage?: "home" | "popular" | "latest" | "browse" }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const [isHoveringTop, setIsHoveringTop] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [infoMenuOpen, setInfoMenuOpen] = useState(false);
 
   const genres = [
     "Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror",
@@ -167,6 +168,66 @@ export default function Header({ onToggleBookmarks, onSearch, onGenreSelect, onN
               </svg>
               <span className="text-xs sm:text-sm font-medium hidden sm:inline">Library</span>
             </button>
+
+            {/* Info Menu Button */}
+            <div className="relative">
+              <button
+                onClick={() => setInfoMenuOpen(!infoMenuOpen)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#2bd5d5]/30 text-[#aeeeee] bg-[#0a0a0a]/60 hover:bg-[#052424] hover:border-[#2bd5d5] transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-medium hidden sm:inline">Info</span>
+              </button>
+              
+              {/* Info Dropdown */}
+              {infoMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setInfoMenuOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-56 bg-[#0a0a0a]/95 backdrop-blur-xl border border-[#2bd5d5]/30 rounded-lg shadow-2xl shadow-[#2bd5d5]/10 z-50">
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          onNavigateAbout?.();
+                          setInfoMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-[#e6f7f7] hover:bg-[#2bd5d5]/10 hover:text-[#2bd5d5] rounded transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        About
+                      </button>
+                      <button
+                        onClick={() => {
+                          onNavigateTerms?.();
+                          setInfoMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-[#e6f7f7] hover:bg-[#2bd5d5]/10 hover:text-[#2bd5d5] rounded transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Terms of Service
+                      </button>
+                      <button
+                        onClick={() => {
+                          onNavigatePrivacy?.();
+                          setInfoMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-[#e6f7f7] hover:bg-[#2bd5d5]/10 hover:text-[#2bd5d5] rounded transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Privacy Policy
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </nav>
         </div>
       </div>

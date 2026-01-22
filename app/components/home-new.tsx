@@ -10,6 +10,8 @@ import Library from "./library";
 import About from "./About";
 import Footer from "./Footer";
 import LazyImage from "./LazyImage";
+import TermsOfService from "./TermsOfService";
+import PrivacyPolicy from "./PrivacyPolicy";
 
 type PosterCardProps = { manga: any; onClick: () => void; delay?: number };
 
@@ -74,6 +76,8 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const [librarySection, setLibrarySection] = useState<"popular" | "latest" | "browse" | null>(null);
   const [popular, setPopular] = useState<any[]>([]);
   const [latest, setLatest] = useState<any[]>([]);
@@ -102,6 +106,8 @@ export default function Home() {
     setQuery("");
     setShowBookmarks(false);
     setShowAbout(false);
+    setShowTerms(false);
+    setShowPrivacy(false);
   };
 
   useEffect(() => {
@@ -179,6 +185,9 @@ export default function Home() {
           onNavigatePopular={() => setLibrarySection("popular")}
           onNavigateLatest={() => setLibrarySection("latest")}
           onNavigateBrowse={() => setLibrarySection("browse")}
+          onNavigateAbout={() => setShowAbout(true)}
+          onNavigateTerms={() => { setShowAbout(false); setShowTerms(true); }}
+          onNavigatePrivacy={() => { setShowAbout(false); setShowPrivacy(true); }}
           activePage="home"
         />
         <main className="max-w-7xl mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-20 sm:pt-24">
@@ -190,6 +199,72 @@ export default function Home() {
           onNavigateBrowse={() => setLibrarySection("browse")} 
           onNavigateBookmarks={() => setShowBookmarks(true)}
           onNavigateAbout={() => setShowAbout(true)}
+          onNavigateTerms={() => { setShowAbout(false); setShowTerms(true); }}
+          onNavigatePrivacy={() => { setShowAbout(false); setShowPrivacy(true); }}
+        />
+      </div>
+    );
+  }
+
+  if (showTerms) {
+    return (
+      <div className="min-h-screen bg-[#040506] text-[#e6f7f7]">
+        <Header 
+          onToggleBookmarks={() => setShowBookmarks(s => !s)} 
+          onSearch={handleSearch} 
+          onGenreSelect={handleGenreSelect}
+          onNavigateHome={handleBackToHome}
+          onNavigatePopular={() => setLibrarySection("popular")}
+          onNavigateLatest={() => setLibrarySection("latest")}
+          onNavigateBrowse={() => setLibrarySection("browse")}
+          onNavigateAbout={() => { setShowTerms(false); setShowAbout(true); }}
+          onNavigateTerms={() => setShowTerms(true)}
+          onNavigatePrivacy={() => { setShowTerms(false); setShowPrivacy(true); }}
+          activePage="home"
+        />
+        <main className="max-w-7xl mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-20 sm:pt-24">
+          <TermsOfService />
+        </main>
+        <Footer 
+          onNavigatePopular={() => setLibrarySection("popular")} 
+          onNavigateLatest={() => setLibrarySection("latest")} 
+          onNavigateBrowse={() => setLibrarySection("browse")} 
+          onNavigateBookmarks={() => setShowBookmarks(true)}
+          onNavigateAbout={() => { setShowTerms(false); setShowAbout(true); }}
+          onNavigateTerms={() => setShowTerms(true)}
+          onNavigatePrivacy={() => { setShowTerms(false); setShowPrivacy(true); }}
+        />
+      </div>
+    );
+  }
+
+  if (showPrivacy) {
+    return (
+      <div className="min-h-screen bg-[#040506] text-[#e6f7f7]">
+        <Header 
+          onToggleBookmarks={() => setShowBookmarks(s => !s)} 
+          onSearch={handleSearch} 
+          onGenreSelect={handleGenreSelect}
+          onNavigateHome={handleBackToHome}
+          onNavigatePopular={() => setLibrarySection("popular")}
+          onNavigateLatest={() => setLibrarySection("latest")}
+          onNavigateBrowse={() => setLibrarySection("browse")}
+          onNavigateAbout={() => { setShowPrivacy(false); setShowAbout(true); }}
+          onNavigateTerms={() => { setShowPrivacy(false); setShowTerms(true); }}
+          onNavigatePrivacy={() => setShowPrivacy(true)}
+          activePage="home"
+        />
+        <main className="max-w-7xl mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-20 sm:pt-24">
+          <PrivacyPolicy />
+        </main>
+        <Footer 
+          onNavigatePopular={() => setLibrarySection("popular")} 
+          onNavigateLatest={() => setLibrarySection("latest")} 
+          onNavigateBrowse={() => setLibrarySection("browse")} 
+          onNavigateBookmarks={() => setShowBookmarks(true)}
+          onNavigateAbout={() => { setShowPrivacy(false); setShowAbout(true); }}
+          onNavigateTerms={() => { setShowPrivacy(false); setShowTerms(true); }}
+          onNavigatePrivacy={() => setShowPrivacy(true)}
         />
       </div>
     );
@@ -206,6 +281,9 @@ export default function Home() {
           onNavigatePopular={() => setLibrarySection("popular")}
           onNavigateLatest={() => setLibrarySection("latest")}
           onNavigateBrowse={() => setLibrarySection("browse")}
+          onNavigateAbout={() => setShowAbout(true)}
+          onNavigateTerms={() => setShowTerms(true)}
+          onNavigatePrivacy={() => setShowPrivacy(true)}
         />
         <main className="max-w-7xl mx-auto p-2 sm:p-4 pt-20 sm:pt-24">
           <Series id={selectedManga} />
@@ -224,6 +302,9 @@ export default function Home() {
         onNavigatePopular={() => setLibrarySection("popular")}
         onNavigateLatest={() => setLibrarySection("latest")}
         onNavigateBrowse={() => setLibrarySection("browse")}
+        onNavigateAbout={() => setShowAbout(true)}
+        onNavigateTerms={() => setShowTerms(true)}
+        onNavigatePrivacy={() => setShowPrivacy(true)}
         activePage="home"
       />
       
@@ -467,7 +548,7 @@ export default function Home() {
         </>
       )}
       
-      <Footer onNavigatePopular={() => setLibrarySection("popular")} onNavigateLatest={() => setLibrarySection("latest")} onNavigateBrowse={() => setLibrarySection("browse")} onNavigateBookmarks={() => setShowBookmarks(true)} onNavigateAbout={() => setShowAbout(true)} />
+      <Footer onNavigatePopular={() => setLibrarySection("popular")} onNavigateLatest={() => setLibrarySection("latest")} onNavigateBrowse={() => setLibrarySection("browse")} onNavigateBookmarks={() => setShowBookmarks(true)} onNavigateAbout={() => setShowAbout(true)} onNavigateTerms={() => setShowTerms(true)} onNavigatePrivacy={() => setShowPrivacy(true)} />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export default function Footer({ onNavigatePopular, onNavigateLatest, onNavigateBrowse, onNavigateBookmarks, onNavigateAbout }: { onNavigatePopular?: () => void; onNavigateLatest?: () => void; onNavigateBrowse?: () => void; onNavigateBookmarks?: () => void; onNavigateAbout?: () => void }) {
+export default function Footer({ onNavigatePopular, onNavigateLatest, onNavigateBrowse, onNavigateBookmarks, onNavigateAbout, onNavigateTerms, onNavigatePrivacy }: { onNavigatePopular?: () => void; onNavigateLatest?: () => void; onNavigateBrowse?: () => void; onNavigateBookmarks?: () => void; onNavigateAbout?: () => void; onNavigateTerms?: () => void; onNavigatePrivacy?: () => void }) {
   return (
     <footer className="w-full bg-gradient-to-t from-black via-black/95 to-transparent border-t border-[#2bd5d5]/20 mt-8 sm:mt-12 md:mt-16">
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
@@ -37,9 +37,9 @@ export default function Footer({ onNavigatePopular, onNavigateLatest, onNavigate
             <h3 className="text-base sm:text-lg font-bold text-[#2bd5d5] mb-2 sm:mb-3">Information</h3>
             <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-[#93a9a9]">
               <li><button onClick={onNavigateAbout} className="hover:text-[#2bd5d5] transition-colors">About Us</button></li>
-              <li><a href="#" className="hover:text-[#2bd5d5] transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-[#2bd5d5] transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-[#2bd5d5] transition-colors">Contact</a></li>
+              <li><button onClick={onNavigateTerms} className="hover:text-[#2bd5d5] transition-colors">Terms of Service</button></li>
+              <li><button onClick={onNavigatePrivacy} className="hover:text-[#2bd5d5] transition-colors">Privacy Policy</button></li>
+              <li><a href="https://github.com/yourusername/mika-anime" target="_blank" rel="noopener noreferrer" className="hover:text-[#2bd5d5] transition-colors">Contact</a></li>
             </ul>
           </div>
         </div>
