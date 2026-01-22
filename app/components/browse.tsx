@@ -363,7 +363,7 @@ export default function Browse({ query = "", onSelectManga, genreMode, selectedG
                   
                   const coverRel = m.relationships?.find((r: any) => r.type === 'cover_art');
                   const coverFilename = coverRel?.attributes?.fileName;
-                  const coverUrl = coverFilename ? `https://uploads.mangadex.org/covers/${m.id}/${coverFilename}.256.jpg` : '/placeholder.jpg';
+                  const coverUrl = coverFilename ? `/api/cover?mangaId=${m.id}&fileName=${coverFilename}` : '/placeholder.jpg';
                   
                   return (
                     <div 

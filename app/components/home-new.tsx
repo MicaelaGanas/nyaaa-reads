@@ -160,7 +160,7 @@ export default function Home() {
   }, [popular.length]);
 
   const featured = popular[featuredIndex];
-  const getFeaturedCover = () => getCoverUrl(featured);
+  const getFeaturedCover = () => featured ? getCoverUrl(featured) : undefined;
   const featuredTitle = featured?.attributes?.title?.en || Object.values(featured?.attributes?.title || {})[0] || "";
   const featuredDesc = featured?.attributes?.description?.en || "";
 
