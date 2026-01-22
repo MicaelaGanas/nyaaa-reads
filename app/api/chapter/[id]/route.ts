@@ -3,9 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// In-memory cache with TTL
-// MangaDex rate limits: 5 req/sec global, 40 req/min for AtHome endpoint
-// Caching reduces load and ensures compliance
 const cache = new Map<string, { data: any; expires: number }>();
 
 function getCached(key: string) {
@@ -27,8 +24,6 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    
-    // Check cache first - chapter data rarely changes
     const cacheKey = `chapter:${id}`;
     const cached = getCached(cacheKey);
     
@@ -42,9 +37,8 @@ export async function GET(
       return NextResponse.json(cached, { headers });
     }
 
-    // Fetch chapter server info from MangaDex with timeout - CACHED
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout for Vercel
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const response = await fetch(`https://api.mangadex.org/at-home/server/${id}`, {
       headers: {
@@ -61,7 +55,6 @@ export async function GET(
       const errorText = await response.text();
       console.error(`MangaDex API error ${response.status}:`, errorText);
       
-      // Return errors with CORS headers
       const headers = new Headers();
       headers.set('Access-Control-Allow-Origin', '*');
       headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -82,10 +75,8 @@ export async function GET(
 
     const data = await response.json();
     
-    // Cache chapter data for 10 minutes (chapters don't change often)
     setCached(cacheKey, data, 600);
 
-    // Create response with proper CORS headers
     const headers = new Headers();
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

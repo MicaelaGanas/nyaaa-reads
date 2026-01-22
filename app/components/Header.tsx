@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import ThemeToggle from "./ThemeToggle";
 
 export default function Header({ onToggleBookmarks, onSearch, onGenreSelect, onNavigateHome, onNavigatePopular, onNavigateLatest, onNavigateBrowse, onNavigateAbout, onNavigateTerms, onNavigatePrivacy, activePage = "home" }: { onToggleBookmarks?: () => void; onSearch?: (q: string) => void; onGenreSelect?: (genre: string) => void; onNavigateHome?: () => void; onNavigatePopular?: () => void; onNavigateLatest?: () => void; onNavigateBrowse?: () => void; onNavigateAbout?: () => void; onNavigateTerms?: () => void; onNavigatePrivacy?: () => void; activePage?: "home" | "popular" | "latest" | "browse" }) {
   const [searchOpen, setSearchOpen] = useState(false);

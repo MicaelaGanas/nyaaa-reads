@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-// In-memory cache with TTL
 const cache = new Map<string, { data: any; expires: number }>();
 
 function getCached(key: string) {
@@ -25,14 +24,9 @@ export async function GET(
   try {
     const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
-    
-    // Check if this is a feed request
     const isFeed = searchParams.get('feed') === 'true';
-    
-    // Create cache key from all params
     const cacheKey = `manga:${id}:${isFeed}:${new URLSearchParams(searchParams).toString()}`;
     
-    // Check cache first (especially for feed requests)
     if (isFeed) {
       const cached = getCached(cacheKey);
       if (cached) {
@@ -48,14 +42,11 @@ export async function GET(
     
     let apiUrl: string;
     if (isFeed) {
-      // Fetch manga feed (chapters)
       apiUrl = `https://api.mangadex.org/manga/${id}/feed`;
     } else {
-      // Fetch manga details
       apiUrl = `https://api.mangadex.org/manga/${id}`;
     }
     
-    // Add all query parameters
     const url = new URL(apiUrl);
     searchParams.forEach((value, key) => {
       if (key !== 'feed') {
@@ -80,9 +71,8 @@ export async function GET(
 
     const data = await response.json();
     
-    // Cache feed responses (they change less frequently)
     if (isFeed && data.data) {
-      setCached(cacheKey, data, 600); // Cache for 10 minutes
+      setCached(cacheKey, data, 600);
     }
 
     const headers = new Headers();

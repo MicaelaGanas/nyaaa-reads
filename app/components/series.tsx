@@ -180,13 +180,10 @@ export default function Series({ id }: { id: string }) {
 
   const availableLanguages = Array.from(new Set(chapters.map((c) => c.attributes?.translatedLanguage).filter(Boolean)));
 
-  // Filter and sort chapters
   let filteredChapters = chapters.filter(c => {
-    // Language filter
     if (selectedLanguage !== "all" && c.attributes?.translatedLanguage !== selectedLanguage) {
       return false;
     }
-    // Search filter
     if (searchQuery) {
       const title = c.attributes?.title || `Chapter ${c.attributes?.chapter || ""}`;
       const chapterNum = c.attributes?.chapter || "";
@@ -196,14 +193,12 @@ export default function Series({ id }: { id: string }) {
     return true;
   });
 
-  // Sort chapters
   filteredChapters = [...filteredChapters].sort((a, b) => {
     const aNum = parseFloat(a.attributes?.chapter) || 0;
     const bNum = parseFloat(b.attributes?.chapter) || 0;
     return sortOrder === "desc" ? bNum - aNum : aNum - bNum;
   });
 
-  // Group by chapter number if enabled
   let displayChapters = filteredChapters;
   if (groupByChapter) {
     const grouped = new Map<string, any[]>();
@@ -214,7 +209,6 @@ export default function Series({ id }: { id: string }) {
       }
       grouped.get(chNum)!.push(c);
     });
-    // Take the first of each group (or let user expand to see all)
     displayChapters = Array.from(grouped.values()).map(group => group[0]);
   }
 

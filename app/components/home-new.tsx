@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Header from "./Header";
-import SearchBar from "./SearchBar";
 import Browse from "./browse";
 import Bookmarks from "./bookmarks";
 import Series from "./series";

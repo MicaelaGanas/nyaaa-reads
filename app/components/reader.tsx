@@ -20,24 +20,19 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    
-    // Clear cache when chapter changes to force fresh fetch
     clearFetchCache();
     
-    // Retry logic for Vercel reliability
     const fetchWithRetry = async (retries = 2) => {
       for (let i = 0; i <= retries; i++) {
         try {
           const d = await fetchJsonCached(`/api/chapter/${chapterId}`);
-          console.log('Chapter data received:', d); // DEBUG
           
           if (!mounted) return;
           
-          // Only reject if there's an explicit error
           if (d?.error) {
-            console.error('API returned error:', d.error, d.details); // DEBUG
+            console.error('API returned error:', d.error, d.details);
             if (i < retries) {
-              await new Promise(r => setTimeout(r, 1000 * (i + 1))); // Wait before retry
+              await new Promise(r => setTimeout(r, 1000 * (i + 1)));
               continue;
             }
             setPages([]);
@@ -49,16 +44,13 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
           const hash = chapter.hash;
           const files: string[] = chapter.data || [];
           
-          console.log('Parsed:', { base, hash, filesCount: files?.length }); // DEBUG
-          
           if (base && hash && files && files.length > 0) {
-            // Proxy images through our API to avoid MangaDex hotlinking restrictions
             const imgs = files.map((f: string) => {
               const originalUrl = `${base}/data/${hash}/${f}`;
               return `/api/proxy-image?url=${encodeURIComponent(originalUrl)}`;
             });
             setPages(imgs);
-            return; // Success, exit retry loop
+            return;
           } else {
             console.warn('Missing required fields:', { hasBase: !!base, hasHash: !!hash, filesCount: files?.length }); // DEBUG
             setPages([]);
@@ -67,7 +59,7 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
         } catch (err) {
           console.error(`Error fetching chapter (attempt ${i + 1}):`, err);
           if (i < retries) {
-            await new Promise(r => setTimeout(r, 1000 * (i + 1))); // Wait before retry
+            await new Promise(r => setTimeout(r, 1000 * (i + 1)));
           } else {
             setPages([]);
           }
@@ -82,13 +74,11 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
     };
   }, [chapterId]);
 
-  // Find current chapter index and get prev/next
   const currentIndex = chapters.findIndex((c) => c.id === chapterId);
   const prevChapter = currentIndex > 0 ? chapters[currentIndex - 1] : null;
   const nextChapter = currentIndex < chapters.length - 1 ? chapters[currentIndex + 1] : null;
   const currentChapter = chapters[currentIndex];
   
-  // Get chapter label
   const getChapterLabel = () => {
     if (!currentChapter) return "Chapter";
     const chNum = currentChapter.attributes?.chapter;
