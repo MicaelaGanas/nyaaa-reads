@@ -9,9 +9,7 @@ export default function About() {
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="relative">
               <div className="absolute inset-0 bg-[#2bd5d5]/30 blur-xl rounded-full" />
-              <svg className="relative w-12 h-12 text-[#2bd5d5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <img src="/cat.ico" alt="NyaaReads Logo" className="relative w-20 h-20 object-contain" />
             </div>
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black bg-gradient-to-r from-[#2bd5d5] via-[#19bfbf] to-[#2bd5d5] bg-clip-text text-transparent mb-3">

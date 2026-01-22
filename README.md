@@ -208,12 +208,15 @@ nyaareads/
 
 ### Environment Variables
 
-Create a `.env.local` file (optional):
+Create a `.env.local` file:
 
 ```env
-# No environment variables required for basic usage
-# All API calls are proxied through Next.js API routes
+# Contact Form (Optional - Required only if you want to enable the contact form)
+# Get your API key from https://resend.com
+RESEND_API_KEY=re_your_api_key_here
 ```
+
+**Note**: The contact form will only work if you configure a Resend API key. Without it, the application will still run but the contact form submissions will fail. See [Resend](https://resend.com) for setup instructions.
 
 ### Customization
 

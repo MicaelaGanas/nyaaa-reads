@@ -6,6 +6,12 @@ export default function TermsOfService() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="text-center mb-12">
+        <div className="inline-flex items-center justify-center mb-4">
+          <div className="relative">
+            <div className="absolute inset-0 bg-[#2bd5d5]/30 blur-xl rounded-full" />
+            <img src="/cat.ico" alt="NyaaReads Logo" className="relative w-20 h-20 object-contain" />
+          </div>
+        </div>
         <h1 className="text-4xl md:text-5xl font-black text-[#2bd5d5] mb-4">Terms of Service</h1>
         <p className="text-gray-400">Last updated: January 22, 2026</p>
       </div>
