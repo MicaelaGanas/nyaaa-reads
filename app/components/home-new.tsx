@@ -7,7 +7,9 @@ import Browse from "./browse";
 import Bookmarks from "./bookmarks";
 import Series from "./series";
 import Library from "./library";
+import About from "./About";
 import Footer from "./Footer";
+import LazyImage from "./LazyImage";
 
 type PosterCardProps = { manga: any; onClick: () => void; delay?: number };
 
@@ -35,11 +37,12 @@ function PosterCard({ manga, onClick, delay = 0 }: PosterCardProps) {
     <div onClick={onClick} className={`cursor-pointer group transition-all duration-500 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
       <div className="relative w-[120px] sm:w-[150px] md:w-[180px] h-[170px] sm:h-[215px] md:h-[260px] rounded-lg sm:rounded-xl overflow-hidden border border-gray-800 group-hover:border-[#2bd5d5] group-hover:shadow-2xl group-hover:shadow-[#2bd5d5]/30 transition-all duration-300">
         <div className="absolute inset-0">
-          {coverUrl ? (
-            <img src={coverUrl} alt={title} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-          ) : (
-            <div className="w-full h-full bg-gray-900 flex items-center justify-center text-sm text-gray-500">No cover</div>
-          )}
+          <LazyImage 
+            src={coverUrl} 
+            alt={title} 
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            fallback={<div className="w-full h-full bg-gray-900 flex items-center justify-center text-sm text-gray-500">No cover</div>}
+          />
         </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
@@ -70,6 +73,7 @@ function PosterCard({ manga, onClick, delay = 0 }: PosterCardProps) {
 export default function Home() {
   const [query, setQuery] = useState("");
   const [showBookmarks, setShowBookmarks] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [librarySection, setLibrarySection] = useState<"popular" | "latest" | "browse" | null>(null);
   const [popular, setPopular] = useState<any[]>([]);
   const [latest, setLatest] = useState<any[]>([]);
@@ -96,6 +100,8 @@ export default function Home() {
     setIsSearchMode(false);
     setSelectedGenre(null);
     setQuery("");
+    setShowBookmarks(false);
+    setShowAbout(false);
   };
 
   useEffect(() => {
@@ -160,6 +166,33 @@ export default function Home() {
 
   if (librarySection) {
     return <Library section={librarySection} onNavigateHome={() => setLibrarySection(null)} />;
+  }
+
+  if (showAbout) {
+    return (
+      <div className="min-h-screen bg-[#040506] text-[#e6f7f7]">
+        <Header 
+          onToggleBookmarks={() => setShowBookmarks(s => !s)} 
+          onSearch={handleSearch} 
+          onGenreSelect={handleGenreSelect}
+          onNavigateHome={handleBackToHome}
+          onNavigatePopular={() => setLibrarySection("popular")}
+          onNavigateLatest={() => setLibrarySection("latest")}
+          onNavigateBrowse={() => setLibrarySection("browse")}
+          activePage="home"
+        />
+        <main className="max-w-7xl mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-20 sm:pt-24">
+          <About />
+        </main>
+        <Footer 
+          onNavigatePopular={() => setLibrarySection("popular")} 
+          onNavigateLatest={() => setLibrarySection("latest")} 
+          onNavigateBrowse={() => setLibrarySection("browse")} 
+          onNavigateBookmarks={() => setShowBookmarks(true)}
+          onNavigateAbout={() => setShowAbout(true)}
+        />
+      </div>
+    );
   }
 
   if (selectedManga) {
@@ -428,7 +461,7 @@ export default function Home() {
         </>
       )}
       
-      <Footer onNavigatePopular={() => setLibrarySection("popular")} onNavigateLatest={() => setLibrarySection("latest")} onNavigateBrowse={() => setLibrarySection("browse")} onNavigateBookmarks={() => setShowBookmarks(true)} />
+      <Footer onNavigatePopular={() => setLibrarySection("popular")} onNavigateLatest={() => setLibrarySection("latest")} onNavigateBrowse={() => setLibrarySection("browse")} onNavigateBookmarks={() => setShowBookmarks(true)} onNavigateAbout={() => setShowAbout(true)} />
     </div>
   );
 }
