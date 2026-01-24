@@ -207,6 +207,52 @@ export default function Reader({ chapterId, onClose, chapters = [], onRequestCha
 
 function PagedView({ pages }: { pages: string[] }) {
   const [index, setIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const minSwipeDistance = 50;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartX.current || !touchStartY.current) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchStartX.current - touchEndX;
+    const deltaY = touchStartY.current - touchEndY;
+
+    // Only consider horizontal swipes (deltaX > deltaY)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+      if (deltaX > 0) {
+        // Swipe left - next page
+        setIndex(i => Math.min(pages.length - 1, i + 1));
+      } else {
+        // Swipe right - previous page
+        setIndex(i => Math.max(0, i - 1));
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const imageWidth = rect.width;
+    
+    // If clicked on the left half, go to previous page
+    if (clickX < imageWidth / 2) {
+      setIndex(i => Math.max(0, i - 1));
+    } else {
+      // If clicked on the right half, go to next page
+      setIndex(i => Math.min(pages.length - 1, i + 1));
+    }
+  };
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between bg-[#0a0a0a]/60 border border-[#2bd5d5]/20 rounded-lg p-2 sm:p-4">
@@ -230,11 +276,16 @@ function PagedView({ pages }: { pages: string[] }) {
           <span className="sm:hidden">→</span>
         </button>
       </div>
-      <div>
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="cursor-pointer"
+      >
         <img 
           src={pages[index]} 
           alt={`page ${index + 1}`} 
           className="w-full rounded-lg shadow-lg" 
+          onClick={handleImageClick}
           onError={(e) => console.error(`Failed to load page ${index + 1}:`, pages[index], e)}
           onLoad={() => console.log(`Loaded page ${index + 1}`)}
         />

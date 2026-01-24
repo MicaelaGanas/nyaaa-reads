@@ -36,6 +36,13 @@ export default function Header({ onToggleBookmarks, onSearch, onGenreSelect, onN
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHoveringTop]);
 
+  // Reset menu states when component mounts or when activePage changes
+  useEffect(() => {
+    setMenuOpen(false);
+    setInfoMenuOpen(false);
+    setSearchOpen(false);
+  }, [activePage]);
+
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (searchValue.trim()) {

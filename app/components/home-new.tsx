@@ -446,21 +446,45 @@ export default function Home() {
   if (selectedManga) {
     return (
       <div className="min-h-screen bg-[#040506] text-[#e6f7f7]">
-        <Header 
-          onToggleBookmarks={handleToggleBookmarks} 
-          onSearch={handleSearch} 
-          onGenreSelect={handleGenreSelect}
-          onNavigateHome={handleBackToHome}
-          onNavigatePopular={handleNavigatePopular}
-          onNavigateLatest={handleNavigateLatest}
-          onNavigateBrowse={handleNavigateBrowse}
-          onNavigateAbout={() => { setShowTerms(false); setShowPrivacy(false); setShowContact(false); setShowAbout(true); }}
-          onNavigateTerms={() => { setShowAbout(false); setShowPrivacy(false); setShowContact(false); setShowTerms(true); }}
-          onNavigatePrivacy={() => { setShowAbout(false); setShowTerms(false); setShowContact(false); setShowPrivacy(true); }}
-          onNavigateContact={() => { setShowAbout(false); setShowTerms(false); setShowPrivacy(false); setShowContact(true); }}
-        />
-        <main className="max-w-7xl mx-auto p-2 sm:p-4 pt-20 sm:pt-24">
-          <Series id={selectedManga} />
+        <main className="max-w-7xl mx-auto p-2 sm:p-4">
+          <Series 
+            id={selectedManga}
+            onToggleBookmarks={handleToggleBookmarks}
+            onSearch={handleSearch}
+            onGenreSelect={handleGenreSelect}
+            onNavigateHome={handleBackToHome}
+            onNavigatePopular={handleNavigatePopular}
+            onNavigateLatest={handleNavigateLatest}
+            onNavigateBrowse={handleNavigateBrowse}
+            onNavigateAbout={() => { 
+              setSelectedManga(null);
+              setShowTerms(false); 
+              setShowPrivacy(false); 
+              setShowContact(false); 
+              setShowAbout(true); 
+            }}
+            onNavigateTerms={() => { 
+              setSelectedManga(null);
+              setShowAbout(false); 
+              setShowPrivacy(false); 
+              setShowContact(false); 
+              setShowTerms(true); 
+            }}
+            onNavigatePrivacy={() => { 
+              setSelectedManga(null);
+              setShowAbout(false); 
+              setShowTerms(false); 
+              setShowContact(false); 
+              setShowPrivacy(true); 
+            }}
+            onNavigateContact={() => { 
+              setSelectedManga(null);
+              setShowAbout(false); 
+              setShowTerms(false); 
+              setShowPrivacy(false); 
+              setShowContact(true); 
+            }}
+          />
         </main>
       </div>
     );

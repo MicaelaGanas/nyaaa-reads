@@ -6,7 +6,33 @@ import BookmarkButton from "./BookmarkButton";
 import Header from "./Header";
 import Bookmarks from "./bookmarks";
 
-export default function Series({ id }: { id: string }) {
+export default function Series({ 
+  id,
+  onToggleBookmarks,
+  onSearch,
+  onGenreSelect,
+  onNavigateHome,
+  onNavigatePopular,
+  onNavigateLatest,
+  onNavigateBrowse,
+  onNavigateAbout,
+  onNavigateTerms,
+  onNavigatePrivacy,
+  onNavigateContact
+}: { 
+  id: string;
+  onToggleBookmarks?: () => void;
+  onSearch?: (q: string) => void;
+  onGenreSelect?: (genre: string) => void;
+  onNavigateHome?: () => void;
+  onNavigatePopular?: () => void;
+  onNavigateLatest?: () => void;
+  onNavigateBrowse?: () => void;
+  onNavigateAbout?: () => void;
+  onNavigateTerms?: () => void;
+  onNavigatePrivacy?: () => void;
+  onNavigateContact?: () => void;
+}) {
   const [data, setData] = useState<any | null>(null);
   const [chapters, setChapters] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +94,11 @@ export default function Series({ id }: { id: string }) {
           allChapters = [...allChapters, ...list];
           
           if (isFirstBatch) {
-            setChapters([...allChapters]);
+            // Deduplicate chapters by ID to prevent duplicate key warnings
+            const uniqueChapters = allChapters.filter((chapter, index, self) => 
+              index === self.findIndex(c => c.id === chapter.id)
+            );
+            setChapters([...uniqueChapters]);
             setLoadingChapters(false);
             isFirstBatch = false;
           }
@@ -90,8 +120,12 @@ export default function Series({ id }: { id: string }) {
       }
 
       if (!mounted) return;
-      setChapters(allChapters);
-      if (allChapters.length === 0) {
+      // Deduplicate chapters by ID to prevent duplicate key warnings
+      const uniqueChapters = allChapters.filter((chapter, index, self) => 
+        index === self.findIndex(c => c.id === chapter.id)
+      );
+      setChapters(uniqueChapters);
+      if (uniqueChapters.length === 0) {
         setError(`No chapters found for this manga`);
       } else {
         setError(null);
@@ -115,7 +149,21 @@ export default function Series({ id }: { id: string }) {
           <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-[#2bd5d5] rounded-full mix-blend-multiply filter blur-3xl opacity-10" />
         </div>
 
-        <Header onToggleBookmarks={() => setShowBookmarks(true)} />
+        <Header 
+          key={`header-loading-${id}`}
+          onToggleBookmarks={onToggleBookmarks}
+          onSearch={onSearch}
+          onGenreSelect={onGenreSelect}
+          onNavigateHome={onNavigateHome}
+          onNavigatePopular={onNavigatePopular}
+          onNavigateLatest={onNavigateLatest}
+          onNavigateBrowse={onNavigateBrowse}
+          onNavigateAbout={onNavigateAbout}
+          onNavigateTerms={onNavigateTerms}
+          onNavigatePrivacy={onNavigatePrivacy}
+          onNavigateContact={onNavigateContact}
+          activePage="home"
+        />
         
         <div className="px-4 sm:px-6 lg:px-8 py-6 pt-12 sm:pt-14 max-w-7xl mx-auto relative z-10">
           {/* Back button skeleton */}
@@ -211,7 +259,21 @@ export default function Series({ id }: { id: string }) {
   if (showBookmarks) {
     return (
       <div className="min-h-screen bg-[#040506]">
-        <Header onToggleBookmarks={() => setShowBookmarks(false)} />
+        <Header 
+          key={`header-bookmarks-${id}`}
+          onToggleBookmarks={onToggleBookmarks}
+          onSearch={onSearch}
+          onGenreSelect={onGenreSelect}
+          onNavigateHome={onNavigateHome}
+          onNavigatePopular={onNavigatePopular}
+          onNavigateLatest={onNavigateLatest}
+          onNavigateBrowse={onNavigateBrowse}
+          onNavigateAbout={onNavigateAbout}
+          onNavigateTerms={onNavigateTerms}
+          onNavigatePrivacy={onNavigatePrivacy}
+          onNavigateContact={onNavigateContact}
+          activePage="home"
+        />
         <Bookmarks onBack={() => setShowBookmarks(false)} />
       </div>
     );
@@ -226,7 +288,19 @@ export default function Series({ id }: { id: string }) {
   if (loadingData || loadingChapters) {
     return (
       <div className="min-h-screen bg-[#040506]">
-        <Header onToggleBookmarks={() => setShowBookmarks(true)} />
+        <Header 
+          onToggleBookmarks={onToggleBookmarks}
+          onSearch={onSearch}
+          onGenreSelect={onGenreSelect}
+          onNavigateHome={onNavigateHome}
+          onNavigatePopular={onNavigatePopular}
+          onNavigateLatest={onNavigateLatest}
+          onNavigateBrowse={onNavigateBrowse}
+          onNavigateAbout={onNavigateAbout}
+          onNavigateTerms={onNavigateTerms}
+          onNavigatePrivacy={onNavigatePrivacy}
+          onNavigateContact={onNavigateContact}
+        />
         <div className="px-4 sm:px-6 lg:px-8 py-6 pt-12 sm:pt-14 max-w-7xl mx-auto">
           <div className="h-8 w-32 bg-gray-800 rounded mb-4 sm:mb-6 animate-pulse" />
           <div className="flex flex-col md:flex-row gap-6 mb-8">
@@ -303,8 +377,22 @@ export default function Series({ id }: { id: string }) {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(43,213,213,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(43,213,213,0.03)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]" />
       </div>
 
-      <Header onToggleBookmarks={() => setShowBookmarks(true)} />
-      <div className="px-4 sm:px-6 lg:px-8 py-6 pt-10 sm:pt-14 max-w-7xl mx-auto relative z-10">
+      <Header 
+        key={`header-main-${id}`}
+        onToggleBookmarks={onToggleBookmarks}
+        onSearch={onSearch}
+        onGenreSelect={onGenreSelect}
+        onNavigateHome={onNavigateHome}
+        onNavigatePopular={onNavigatePopular}
+        onNavigateLatest={onNavigateLatest}
+        onNavigateBrowse={onNavigateBrowse}
+        onNavigateAbout={onNavigateAbout}
+        onNavigateTerms={onNavigateTerms}
+        onNavigatePrivacy={onNavigatePrivacy}
+        onNavigateContact={onNavigateContact}
+        activePage="home"
+      />
+      <div className="px-4 sm:px-6 lg:px-8 py-6 pt-20 sm:pt-24 max-w-7xl mx-auto relative z-10">
         <button onClick={() => window.location.href = "/"} className="group flex items-center gap-1 sm:gap-2 mb-4 sm:mb-6 text-[#2bd5d5] hover:text-white transition-all duration-300 font-semibold text-sm sm:text-base relative">
           <span className="absolute inset-0 bg-gradient-to-r from-[#2bd5d5]/10 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity blur-sm" />
           <svg className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -520,6 +608,7 @@ export default function Series({ id }: { id: string }) {
                 {genres.map((g: string, i: number) => (
                   <span 
                     key={i} 
+                    onClick={() => onGenreSelect && onGenreSelect(g)}
                     className="group/genre relative px-3 py-1.5 text-xs font-semibold rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
                   >
                     <span className="absolute inset-0 bg-gradient-to-r from-[#2bd5d5] to-[#19bfbf] opacity-30 group-hover/genre:opacity-50 transition-opacity" />
